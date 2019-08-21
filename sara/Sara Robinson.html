@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<!-- saved from url=(0075)https://sararobinson.dev/2019/04/23/interpret-bag-of-words-models-shap.html -->
+<html class="gr__sararobinson_dev"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<title>Sara Robinson</title>
+	
+	<meta name="author" content="Sara Robinson">
+	<meta name="twitter:site" content="@chronotope">
+	<meta name="twitter:description" content="I recently gave a talk at Google Next 2019 with my teammate Yufeng on how to go from building a machine learning model with AutoML to building your own custo...">
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="./Sara Robinson_files/bootstrap.min.css" rel="stylesheet">
+	<link href="./Sara Robinson_files/font-awesome.min.css" rel="stylesheet">
+	<link href="./Sara Robinson_files/syntax.css" rel="stylesheet">
+	<link href="./Sara Robinson_files/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="https://sararobinson.dev/feed.xml">
+	
+</head>
+
+<body data-gr-c-s-loaded="true" style="">
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/sararob">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/SRobTweets">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:thesararobinson@gmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="https://sararobinson.dev/">
+				<img src="./Sara Robinson_files/sararob-headshot.jpg" class="img-circle">
+				Sara Robinson
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="https://sararobinson.dev/">Home</a></li>
+				<li><a href="https://sararobinson.dev/categories.html">Categories</a></li>
+				<li><a href="https://sararobinson.dev/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="https://sararobinson.dev/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="https://sararobinson.dev/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="https://sararobinson.dev/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="https://sararobinson.dev/2019/04/23/interpret-bag-of-words-models-shap.html#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style=" min-height: 9375px;">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="https://sararobinson.dev/">
+		<img src="./Sara Robinson_files/sararob-headshot.jpg" class="img-circle">
+	</a>
+	<h3 class="title">
+        <a href="https://sararobinson.dev/2019/04/23/interpret-bag-of-words-models-shap.html">Sara Robinson</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Hi there, I'm Sara. I'm currently a Developer Advocate on Google Cloud focused on machine learning 👩🏻‍💻 I love building fun demos and writing blog posts to teach people about ML 🧠
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/sararob">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/SRobTweets">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:thesararobinson@gmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+		
+
+	</ul>
+	<ul class="list-unstyled list-inline">
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/sara-robinson-40377924">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://sararobinson.dev/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	 </ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>Interpreting bag of words models with SHAP </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   April 
+	   23rd,
+	     
+	   2019
+	 </span>
+	  <div class="article_body">
+	  <p>I recently gave a <a href="https://www.youtube.com/watch?v=OHIEZ-Scek8">talk</a> at Google Next 2019 with my teammate Yufeng on how to go from building a machine learning model with AutoML to building your own custom models, deployed on Cloud AI Platform. Here’s an architecture diagram of the full demo:</p>
+
+<p><img src="./Sara Robinson_files/shap-demo.png" alt="SHAP demo overview"></p>
+
+<p>At the end of the talk I showed how to interpret the predictions from a bag of words text model with <a href="https://github.com/slundberg/shap">SHAP</a>. <strong>If you want to skip right to the SHAP section of this post, start <a href="https://sararobinson.dev/2019/04/23/interpret-bag-of-words-models-shap.html#interpreting-a-batch-of-text-predictions-with-shap">here</a>.</strong></p>
+
+<h3 id="the-classification-task">The classification task</h3>
+
+<p>In this example I’ll show you how to build a model to predict the tags of questions from Stack Overflow. To keep things simple our dataset includes questions containing 5 possible ML-related tags:</p>
+
+<p><img src="./Sara Robinson_files/so-classification.png" alt="Stack Overflow prediction"></p>
+
+<p><a href="https://cloud.google.com/bigquery/">BigQuery</a> has a great public dataset that includes over 17 million Stack Overflow questions. We’ll use that to get our training data. And to make this a harder problem for our model, we’ve replaced every instance of a giveaway word in the dataset (like <code class="highlighter-rouge">tensorflow</code>, <code class="highlighter-rouge">tf</code>, <code class="highlighter-rouge">pandas</code>, <code class="highlighter-rouge">pd</code>, etc.) with the word 🥑 <strong>avocado</strong> 🥑. Otherwise our model would likely use the word ‘tensorflow’ to predict that a question is tagged TensorFlow, which wouldn’t be a very interesting problem. The resulting dataset looks like this, with lots of 🥑 ML-related 🥑avocados 🥑 sprinkled 🥑 in:</p>
+
+<p><img src="./Sara Robinson_files/avocados.png" alt="Avocado dataset"></p>
+
+<p>You can access the pre-processed avocado-filled dataset as a CSV <a href="https://storage.googleapis.com/cloudml-demo-lcm/SO_ml_tags_avocado_188k_v2.csv">here</a>.</p>
+
+<h3 id="what-is-a-bag-of-words-model">What is a bag of words model?</h3>
+
+<p>When you start to peel away the layers of a machine learning model, you’ll find it’s just a bunch of matrix multiplication under the hood. Whether the input data to your model is images, text, categorical, or numerical it’ll all be converted into matrices. If you remember <strong>y = mx + b</strong> from algebra class this might look familiar:</p>
+
+<p><img src="./Sara Robinson_files/matmul.png" alt="Matrix multiplication"></p>
+
+<p>This may not seem as intuitive for unstructured data like images and text, but it turns out that any type of data can be represented as a matrix so our model can understand it. <a href="https://en.wikipedia.org/wiki/Bag-of-words_model">Bag of words</a> is one approach to converting free-form text input into matrices. It’s my favorite one to use for getting started with custom text models since it’s relatively straightforward to explain.</p>
+
+<p>Imagine each input to your model as a bag of Scrabble tiles, where each tile is a word from your input sentence instead of a letter. Since it’s a “bag” of words, this approach cannot understand the order of words in a sentence, but it can detect the presence or absence of certain words. To make this work, you need to choose a vocabulary that takes the top N most frequently used words from your entire text corpus. This vocabulary will be the only words your model can understand.</p>
+
+<p>Let’s take a super simplified example from our Stack Overflow dataset. We’ll predict only 3 tags (pandas, keras, and matplotlib), and our vocabulary size will be 10. Think of this as if you’re learning a new language and you only know these 10 words:</p>
+
+<ul>
+  <li>dataframe</li>
+  <li>layer</li>
+  <li>series</li>
+  <li>graph</li>
+  <li>column</li>
+  <li>plot</li>
+  <li>color</li>
+  <li>axes</li>
+  <li>read_csv</li>
+  <li>activation</li>
+</ul>
+
+<p>Now let’s say we’ve got the following input question:</p>
+
+<p><em>how to plot dataframe bar graph</em></p>
+
+<p>The inputs to our model will become a vocabulary sized array (in this case 10), indicating whether or not a particular question contains each word from our vocabulary. The question above contains 3 words from our vocab: <code class="highlighter-rouge">plot</code>, <code class="highlighter-rouge">dataframe</code>, and <code class="highlighter-rouge">graph</code>. Since the other words are <em>not in</em> our vocabulary, our model will not know what they mean.</p>
+
+<p>Now we begin to convert this question into a multi-hot bag of words matrix. We’ll end up with a 10-element array of 1s and 0s indiciating the indices where particular words are present from each input example. Since our question contains the word <code class="highlighter-rouge">dataframe</code> and this is the first word in our vocabulary, the first element of our vocabulary array will contain a 1. We’ll also have a 1 in the 4th and 6th places in our vocabulary array to indicate the presence of <code class="highlighter-rouge">plot</code> and <code class="highlighter-rouge">graph</code> in this sentence.</p>
+
+<p>Here’s what we end up with:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="p">[</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="p">]</span></code></pre></figure>
+
+<p>Even though <code class="highlighter-rouge">plot</code> comes before <code class="highlighter-rouge">dataframe</code> in our sentence, our model will ignore this and use our vocabulary matrix for each input. This question is tagged both <code class="highlighter-rouge">pandas</code> and <code class="highlighter-rouge">matplotlib</code>, so the output vector will be <code class="highlighter-rouge">[1 0 1]</code>. Here’s a visualization to put it all together:</p>
+
+<p><img src="./Sara Robinson_files/bow-example.png" alt="Bag of words simple example"></p>
+
+<h3 id="converting-text-to-bag-of-words-with-keras">Converting text to bag of words with Keras</h3>
+
+<p>Taking the top N words from our text and converting each input into an N-sized vocabulary matrix sounds like a lot of work. Luckily Keras has a utility function for this so we don’t need to do it by hand. And we can do all this from within a notebook (full notebook code coming soon!).</p>
+
+<p>First, we’ll download the CSV to our notebook and create a Pandas DataFrame from the data:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1"># Download the file using the `gsutil` CLI
+</span><span class="err">!</span><span class="n">gsutil</span> <span class="n">cp</span> <span class="s">'gs://cloudml-demo-lcm/SO_ml_tags_avocado_188k_v2.csv'</span> <span class="o">./</span>                            <span class="mi">8231</span>
+
+<span class="c1"># Read, shuffle, and preview the data
+</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'SO_ml_tags_avocado_188k_v2.csv'</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s">'tags'</span><span class="p">,</span> <span class="s">'original_tags'</span><span class="p">,</span> <span class="s">'text'</span><span class="p">],</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'original_tags'</span><span class="p">])</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">shuffle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span></code></pre></figure>
+
+<p>And here’s the preview:</p>
+
+<p><img src="./Sara Robinson_files/pandas-head.png" alt="DataFrame preview"></p>
+
+<p>We’ll use an 80/20 train/test split, so the next step is to get the train size for our dataset and split our question data:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">train_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">*</span> <span class="mf">.8</span><span class="p">)</span>
+
+<span class="n">train_qs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'text'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+<span class="n">test_qs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'text'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">train_size</span><span class="p">:]</span></code></pre></figure>
+
+<p>Now we’re ready to create our Keras <code class="highlighter-rouge">Tokenizer</code> object. When we instantiate it we’ll need to choose a vocabulary size. Remember that this is the top N most frequent words our model will extract from our text data. This number is a <em>hyperparameter</em>, so you should experiment with different values based on the number of unique words in your text corpus. If you pick something too low, your model will only recognize words that are common across all text inputs (like ‘the’, ‘in’, etc.). A vocab size that’s too large will recognize too many words from each question such that input matrices become mostly 1s.</p>
+
+<p>For this dataset, <code class="highlighter-rouge">400</code> worked well:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">tensorflow.keras.preprocessing</span> <span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">Tokenizer</span><span class="p">(</span><span class="n">num_words</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+<span class="n">tokenizer</span><span class="o">.</span><span class="n">fit_on_texts</span><span class="p">(</span><span class="n">train_qs</span><span class="p">)</span>
+
+<span class="n">bag_of_words_train</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">texts_to_matrix</span><span class="p">(</span><span class="n">train_qs</span><span class="p">)</span>
+<span class="n">bag_of_words_test</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">texts_to_matrix</span><span class="p">(</span><span class="n">test_qs</span><span class="p">)</span></code></pre></figure>
+
+<p>Now if we print the first instance from <code class="highlighter-rouge">bag_of_words_train</code>, we can see it has been converted into a 400-element multi-hot vocabulary array:</p>
+
+<p><img src="./Sara Robinson_files/bow-400-vocab.png" alt="Avocado dataset"></p>
+
+<p>With our free-form text converted to bag of words matrices, it’s ready to feed into our model. The next step is to encode our tags (this will be our model’s output, or prediction).</p>
+
+<h3 id="encoding-tags-as-multi-hot-arrays">Encoding tags as multi-hot arrays</h3>
+
+<p>Encoding labels is pretty simple using Scikit-learn’s <code class="highlighter-rouge">MultiLabelBinarizer</code>. Since a single question can have multiple tags, we’ll want our model to output multi-hot arrays. In the CSV, our tags are currently comma-separated strings like: <code class="highlighter-rouge">tensorflow,keras</code>. First, we’ll split these strings into arrays of tags:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">tags_split</span> <span class="o">=</span> <span class="p">[</span><span class="n">tags</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">','</span><span class="p">)</span> <span class="k">for</span> <span class="n">tags</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">'tags'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span></code></pre></figure>
+
+<p>The string above is now a 2-element array: <code class="highlighter-rouge">['tensorflow', 'keras']</code>.</p>
+
+<p>We can feed these label arrays directly into a <code class="highlighter-rouge">MultiLabelBinarizer</code>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1"># Create the encoder
+</span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MultiLabelBinarizer</span>
+
+<span class="n">tag_encoder</span> <span class="o">=</span> <span class="n">MultiLabelBinarizer</span><span class="p">()</span>
+<span class="n">tags_encoded</span> <span class="o">=</span> <span class="n">tag_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">tags_split</span><span class="p">)</span>
+
+<span class="c1"># Split the tags into train/test
+</span><span class="n">train_tags</span> <span class="o">=</span> <span class="n">tags_encoded</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+<span class="n">test_tags</span> <span class="o">=</span> <span class="n">tags_encoded</span><span class="p">[</span><span class="n">train_size</span><span class="p">:]</span></code></pre></figure>
+
+<p>Calling <code class="highlighter-rouge">tag_encoder.classes_</code> will output the label lookup sklearn has created for us:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="p">[</span><span class="s">'keras'</span> <span class="s">'matplotlib'</span> <span class="s">'pandas'</span> <span class="s">'scikitlearn'</span> <span class="s">'tensorflow'</span><span class="p">]</span></code></pre></figure>
+
+<p>And the label for a question tagged ‘keras’ and ‘tensorflow’ becomes:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span></code></pre></figure>
+
+<h3 id="building-and-training-our-model">Building and training our model</h3>
+
+<p>We’ve got our model inputs and outputs formatted, so now it’s time to actually build the model. The Keras Sequential Model API is my favorite way to do this since the code makes it easy to visualize each layer of your model.</p>
+
+<p>We can define our model in 5 lines of code. Let’s see it all and then break it down:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">model</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">VOCAB_SIZE</span><span class="p">,),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">num_tags</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'sigmoid'</span><span class="p">))</span>
+
+<span class="n">model</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">'binary_crossentropy'</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s">'adam'</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s">'accuracy'</span><span class="p">])</span></code></pre></figure>
+
+<p>This is a deep model because it has 2 <strong>hidden layers</strong> in between the input and output layer. We don’t really care about the output of these hidden layers, but our model will use them to represent more complex relationships in our data. The first layer takes our 400-element vocabulary vector as input and transforms it into a 50 neuron layer. Then it takes this 50-neuron layer and transforms it into a 25-neuron layer. <code class="highlighter-rouge">50</code> and <code class="highlighter-rouge">25</code> here (layer size) are hyperparameters, you should experiment with what works best for your own dataset.</p>
+
+<p>What does that <code class="highlighter-rouge">activation='relu'</code> part mean? The activation function is <em>how</em> the model computes the output of each layer. We don’t need to know exactly how this is implemented (thanks Keras!) so I won’t get into the details of ReLU here, but you can <a href="https://en.wikipedia.org/wiki/Rectifier_(neural_networks)">read more about it</a> if you’d like.</p>
+
+<p>The size of our last layer will be equivalent to the number of tags in our dataset (in this case 5). We do care about the output of this layer, so let’s understand why we used the <code class="highlighter-rouge">sigmoid</code> activaton function. <a href="https://en.wikipedia.org/wiki/Sigmoid_function">Sigmoid</a> will convert each of our 5 outputs to a value between 0 and 1 indicating the probability that a specific label corresponds with that input. Here’s an example output for a question tagged ‘keras’ and ‘tensorflow’:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="p">[</span> <span class="mf">.89</span>   <span class="mf">.02</span>   <span class="mf">.001</span>   <span class="mf">.21</span>   <span class="mf">.96</span>  <span class="p">]</span></code></pre></figure>
+
+<p>Notice that because a question can have multiple tags in this model, the sigmoid output does not add up to 1. If a question could only have exactly one tag, we’d use the <a href="https://en.wikipedia.org/wiki/Softmax_function">Softmax activation function</a> instead and the 5-element output array would add up to 1.</p>
+
+<p>We can now train and evaluate our model:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">body_train</span><span class="p">,</span> <span class="n">train_tags</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">body_test</span><span class="p">,</span> <span class="n">test_tags</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span></code></pre></figure>
+
+<p>For this dataset we’ll get about 96% accuracy.</p>
+
+<h3 id="interpreting-a-batch-of-text-predictions-with-shap">Interpreting a batch of text predictions with SHAP</h3>
+
+<p>We’ve got a trained model that can make predictions on new data so we could stop here. But at this point our model is a bit of a black box. We don’t know <em>why</em> it’s predicting certain labels for a particular question, we’re just trusting from our 96% accuracy metric that it’s doing a good job. We can go one step further by using <a href="https://github.com/slundberg/shap">SHAP</a>, an open source framework for interpreting the output of ML models. This is the fun part - it’s like getting a backstage pass to your favorite show to see everything that happens behind the scenes.</p>
+
+<p>My <a href="https://sararobinson.dev/2019/03/24/preventing-bias-machine-learning.html">last post</a> introduces SHAP so I will skip right to the details here. When we use SHAP, it returns an attribution value for each feature in our model indicating how much that feature contributed to the prediction. This is pretty straightforward for structured data, but how would it work for text?</p>
+
+<p>In our bag of words model, SHAP will treat each word in our 400-word vocabulary as an individual feature. We can then map the attribution values to the indices in our vocabulary to see the words that contributed most (and least) to our model’s predictions. First, we’ll create a shap explainer object. There are a couple types of explainers, we’ll use <code class="highlighter-rouge">DeepExplainer</code> since we’ve got a deep model. We instantiate it by passing it our model and a subset of our training data:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">shap</span>
+
+<span class="n">attrib_data</span> <span class="o">=</span> <span class="n">body_train</span><span class="p">[:</span><span class="mi">200</span><span class="p">]</span>
+<span class="n">explainer</span> <span class="o">=</span> <span class="n">shap</span><span class="o">.</span><span class="n">DeepExplainer</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">attrib_data</span><span class="p">)</span></code></pre></figure>
+
+<p>Then we’ll get the attribution values for individual predictions on a subset of our test data:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">num_explanations</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="n">shap_vals</span> <span class="o">=</span> <span class="n">explainer</span><span class="o">.</span><span class="n">shap_values</span><span class="p">(</span><span class="n">body_test</span><span class="p">[:</span><span class="n">num_explanations</span><span class="p">])</span></code></pre></figure>
+
+<p>Before we see which words affected individual predictions, shap has a <code class="highlighter-rouge">summary_plot</code> method which shows us the top features impacting model predictions for a batch of examples (in this case 25). To get the most out of this we need a way to map features to words in our vocabulary. The Keras Tokenizer creates a dictionary of our top words, so if we convert it to a list we’ll be able to match the indices of our attribution values to the word indices in our list. The Tokenizer <code class="highlighter-rouge">word_index</code> is indexed by 1 (I have no idea why), so I’ve appended an empty string to our lookup list to make it 0-indexed:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1"># This is a dict
+</span><span class="n">words</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">word_index</span>
+
+<span class="c1"># Convert it to a list
+</span><span class="n">word_lookup</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">words</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+  <span class="n">word_lookup</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+<span class="n">word_lookup</span> <span class="o">=</span> <span class="p">[</span><span class="s">''</span><span class="p">]</span> <span class="o">+</span> <span class="n">word_lookup</span></code></pre></figure>
+
+<p>And now we can generate a plot:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">shap</span><span class="o">.</span><span class="n">summary_plot</span><span class="p">(</span><span class="n">shap_vals</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">word_lookup</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="n">tag_encoder</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span></code></pre></figure>
+
+<p><img src="./Sara Robinson_files/shap-summary-plot.png" alt="SHAP summary plot"></p>
+
+<p>This shows us the highest magnitude (positive or negative) words in our model, broken down by label. ‘dataframe’ is the biggest signal word used by our model, contributing most to Pandas predictions. This makes sense since most Pandas code uses DataFrames. But notice that it’s also likely a <em>negative</em> signal word for the other frameworks, since it’s unlikely you’d see the word ‘dataframe’ used in a TensorFlow question unless it was about both frameworks.</p>
+
+<h3 id="interpeting-signal-words-for-individual-predictions">Interpeting signal words for individual predictions</h3>
+
+<p>In order to visualize the words for each prediction we need to dive deeper into the <code class="highlighter-rouge">shap_vals</code> list we created above. For each test example we’ve passed to SHAP, it’ll return a feature-sized array (400 for our example) of attribution values <strong>for each possible label</strong>. This took me awhile to wrap my head around, but think of it this way: our model output doesn’t include only it’s highest probability prediction, it includes probabilities for each possible label. So SHAP can tell us why our model predicted .01% for one label and 99% for another. Here’s a breakdown of what <code class="highlighter-rouge">shap_values</code> includes:</p>
+
+<ul>
+  <li>[num_labels sized array] - 5 in our case
+    <ul>
+      <li>[num_examples sized array for each label] - 25
+        <ul>
+          <li>[vocab_sized attribution array for each example] - 400</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>Next, let’s use these attribution values to take the top 5 highest and lowest signaling words for a given prediction and highlight them in a given input. To keep things (relatively) simple, I’ll only show signal words for correct predictions.</p>
+
+<p>I have written a function to print the highest signal words in blue and the lowest in red using the <code class="highlighter-rouge">colored</code> module:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">colored</span>
+<span class="kn">import</span> <span class="nn">re</span> 
+
+<span class="k">def</span> <span class="nf">colorprint</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">neg</span><span class="p">):</span>
+  <span class="c1"># Split question string on multiple chars
+</span>  <span class="n">q_arr</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">q_filtered</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">"[, .()]+"</span><span class="p">,</span> <span class="n">question</span><span class="p">))</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">q_filtered</span><span class="p">:</span>
+    <span class="n">q_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="n">color_str</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q_arr</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">:</span>
+      <span class="n">color_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colored</span><span class="o">.</span><span class="n">fg</span><span class="p">(</span><span class="s">"blue"</span><span class="p">)</span> <span class="o">+</span> <span class="n">word</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">neg</span><span class="p">:</span>
+      <span class="n">color_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colored</span><span class="o">.</span><span class="n">fg</span><span class="p">(</span><span class="s">"light_red"</span><span class="p">)</span> <span class="o">+</span> <span class="n">word</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">color_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colored</span><span class="o">.</span><span class="n">fg</span><span class="p">(</span><span class="s">'black'</span><span class="p">)</span> <span class="o">+</span> <span class="n">word</span><span class="p">)</span>
+
+    <span class="c1"># For wrapped printing
+</span>    <span class="k">if</span> <span class="n">idx</span> <span class="o">%</span> <span class="mi">15</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">color_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+
+  <span class="k">print</span><span class="p">(</span><span class="s">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">color_str</span><span class="p">)</span> <span class="o">+</span> <span class="n">colored</span><span class="o">.</span><span class="n">fg</span><span class="p">(</span><span class="s">'black'</span><span class="p">)</span> <span class="o">+</span> <span class="s">" "</span><span class="p">)</span></code></pre></figure>
+
+<p>And finally, I’ve hacked up some code to call the function above and print signal words for a few random examples:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">examples_to_print</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">24</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">examples_to_print</span><span class="p">)):</span>
+
+  <span class="c1"># Get the highest and lowest signaling words
+</span>  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pred_tag</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">&gt;</span> <span class="mf">0.7</span><span class="p">:</span>
+      <span class="n">attributions</span> <span class="o">=</span> <span class="n">shap_vals</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">examples_to_print</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+      <span class="n">top_signal_words</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">attributions</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span>
+      <span class="n">pos_words</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="n">top_signal_words</span><span class="p">:</span>
+        <span class="n">signal_wd</span> <span class="o">=</span> <span class="n">word_lookup</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span>
+        <span class="n">pos_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">signal_wd</span><span class="p">)</span>
+
+      <span class="n">negative_signal_words</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">attributions</span><span class="p">,</span> <span class="mi">5</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+      <span class="n">neg_words</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="n">negative_signal_words</span><span class="p">:</span>
+        <span class="n">signal_wd</span> <span class="o">=</span> <span class="n">word_lookup</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span>
+        <span class="n">neg_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">signal_wd</span><span class="p">)</span>
+      <span class="n">colorprint</span><span class="p">(</span><span class="n">test_qs</span><span class="p">[</span><span class="n">examples_to_print</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">pos_words</span><span class="p">,</span> <span class="n">neg_words</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span></code></pre></figure>
+
+<p>And voila - this results in a nice visualizaton of signal words for individual predictions. Here’s an example for a correctly-predicted question about Pandas:</p>
+
+<p><img src="./Sara Robinson_files/pandas-prediction.png" alt="Pandas prediction"></p>
+
+<p>This shows us that our model is working well because it’s picking up on accurate signal words unique to Pandas like ‘column’, ‘df1’, and ‘nan’ (a lot of people ask how to deal with NaN values in Pandas). If instead common words like ‘you’ and ‘for’ had high attribution values, we’d want to reevaluate our training data and model. This type of analysis can also help us identify bias.</p>
+
+<p>And here’s an example for a Keras question:</p>
+
+<p><img src="./Sara Robinson_files/keras-prediction.png" alt="Keras prediction"></p>
+
+<p>Again, our model picks up on words unique to Keras to make its prediction like ‘lstm’ and ‘dense’.</p>
+
+<h3 id="deploying-your-model-to-cloud-ai-platform">Deploying your model to Cloud AI Platform</h3>
+
+<p>We can deploy our model to AI Platform using the new <a href="https://cloud.google.com/blog/products/ai-machine-learning/ai-in-depth-creating-preprocessing-model-serving-affinity-with-custom-online-prediction-on-ai-platform-serving">custom code</a> feature. This will let us write custom server-side Python code that’s run at prediction time. Since we need to transform our text into a bag of words matrix before passing it to our model for prediction this feature will be especially useful. We’ll be able to keep our client super simple by passing the raw text directly to our model and letting the server handle transformations. We can implement this by writing a Python class where we do any feature pre-processing or post-processing on the value returned by our model.</p>
+
+<p>First we’ll turn our Keras code from above into a <code class="highlighter-rouge">TextPreprocessor</code> class (adapted from <a href="https://cloud.google.com/blog/products/ai-machine-learning/ai-in-depth-creating-preprocessing-model-serving-affinity-with-custom-online-prediction-on-ai-platform-serving">this post</a>). The <code class="highlighter-rouge">create_tokenizer</code> method instantiates a tokenizer object with a provided vocabulary size, and <code class="highlighter-rouge">transform_text</code> converts text into a bag of words matrix.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">tensorflow.keras.preprocessing</span> <span class="kn">import</span> <span class="n">text</span>
+
+<span class="k">class</span> <span class="nc">TextPreprocessor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_vocab_size</span> <span class="o">=</span> <span class="n">vocab_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span> <span class="o">=</span> <span class="bp">None</span>
+  
+  <span class="k">def</span> <span class="nf">create_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">Tokenizer</span><span class="p">(</span><span class="n">num_words</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_vocab_size</span><span class="p">)</span>
+    <span class="n">tokenizer</span><span class="o">.</span><span class="n">fit_on_texts</span><span class="p">(</span><span class="n">text_list</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+
+  <span class="k">def</span> <span class="nf">transform_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+    <span class="n">text_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">texts_to_matrix</span><span class="p">(</span><span class="n">text_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text_matrix</span></code></pre></figure>
+
+<p>Then, our custom prediction class makes use of this to pre-process text and return predictions as a list of sigmoid probabilities:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="k">class</span> <span class="nc">CustomModelPrediction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">processor</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span> <span class="o">=</span> <span class="n">processor</span>
+  
+  <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instances</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">preprocessed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">transform_text</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">preprocessed_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">predictions</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+  <span class="o">@</span><span class="nb">classmethod</span>
+  <span class="k">def</span> <span class="nf">from_path</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">tensorflow.keras</span> <span class="k">as</span> <span class="n">keras</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span>
+      <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span><span class="s">'keras_saved_model.h5'</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="s">'processor_state.pkl'</span><span class="p">),</span> <span class="s">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+      <span class="n">processor</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">processor</span><span class="p">)</span></code></pre></figure>
+
+<p>To deploy the model on AI Platform you’ll need to have a <a href="https://cloud.google.com/resource-manager/docs/creating-managing-projects">Google Cloud Project</a> along with a Cloud Storage bucket - this is where you’ll put your saved model file and other assets.</p>
+
+<p>First you’ll want to create your model in AI Platform using the <a href="https://cloud.google.com/sdk/gcloud/">gcloud CLI</a> (add a <code class="highlighter-rouge">!</code> in front of the gcloud command if you’re running this from a Python notebook). We’ll create the model with the following:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">gcloud ai-platform models create your_model_name</code></pre></figure>
+
+<p>Then you can deploy your model using <code class="highlighter-rouge">gcloud beta ai-platform versions create</code>. The <code class="highlighter-rouge">--prediction-class</code> flag points our model to the Python code it should run at prediction time:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">gcloud beta ai-platform versions create v1 <span class="nt">--model</span> your_model_name <span class="se">\</span>
+<span class="nt">--origin</span><span class="o">=</span>gs://your_model_bucket/ <span class="se">\</span>
+<span class="nt">--python-version</span><span class="o">=</span>3.5 <span class="se">\</span>
+<span class="nt">--runtime-version</span><span class="o">=</span>1.13 <span class="se">\</span>
+<span class="nt">--framework</span><span class="o">=</span><span class="s1">'TENSORFLOW'</span> <span class="se">\</span>
+<span class="nt">--package-uris</span><span class="o">=</span>gs://your_model_bucket/packages/so_predict-0.1.tar.gz <span class="se">\</span>
+<span class="nt">--prediction-class</span><span class="o">=</span>prediction_class_file.CustomModelPredictionName</code></pre></figure>
+
+<p>If you navigate to the AI Platform Models section of your Cloud console you should see your model deployed within a few minutes:</p>
+
+<p><img src="./Sara Robinson_files/deployed-model.png" alt="Deployed model UI"></p>
+
+<p>Woohoo! We’ve got our model deployed along with some custom code for pre-processing text. Note that we could also make use of the custom code feature for post-processing. If I did that, I could put all of the SHAP logic discussed above into a new method in order to return SHAP attributions to the client and display them to the end user.</p>
+
+<h3 id="learn-more">Learn more</h3>
+
+<p>Check out the <a href="https://www.youtube.com/watch?v=OHIEZ-Scek8">full video</a> of our Next session to see this in action as a live demo:</p>
+
+<p><a href="https://www.youtube.com/watch?v=OHIEZ-Scek8" title="MLAI301s"><img src="./Sara Robinson_files/hqdefault.jpg" alt="Next &#39;19 Breakout"></a></p>
+
+<p>And check out these links for more details on topics covered here:</p>
+
+<ul>
+  <li><a href="https://cloud.google.com/bigquery/public-data/">BigQuery Public Datasets</a></li>
+  <li><a href="https://cloud.google.com/ai-platform/">Cloud AI Platform</a></li>
+  <li><a href="https://github.com/slundberg/shap">SHAP</a></li>
+</ul>
+
+<p>Questions or comments? Let me know on Twitter at <a href="https://twitter.com/srobtweets">@SRobTweets</a>.</p>
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="https://sararobinson.dev/categories.html#ml-ref">
+					ml <span>(2)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="https://sararobinson.dev/tags.html#ml-ref">
+					ml <span>(2)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=Interpreting%20bag%20of%20words%20models%20with%20SHAP&amp;via=SRobTweets" onclick="window.open(this.href, &#39;twitter-share&#39;, &#39;width=550,height=235&#39;);return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php" onclick="window.open(this.href, &#39;facebook-share&#39;,&#39;width=580,height=296&#39;);return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+      </section>
+
+      <!-- <section class="col-sm-6 author">
+        <img src="/assets/media/sararob-headshot.jpg" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Sara Robinson</h4>
+        <p class="author-bio">Hi there, I'm Sara. I'm currently a Developer Advocate on Google Cloud focused on machine learning 👩🏻‍💻 I love building fun demos and writing blog posts to teach people about ML 🧠</p>
+      </section> -->
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="https://sararobinson.dev/2019/03/24/preventing-bias-machine-learning.html" title="Preventing bias in ML models, with code">← Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="https://sararobinson.dev/2019/05/24/analyzing-sleep-quality-oura-bigquery.html" title="Which factors contribute to my sleep quality?">Next →</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+
+
+		<footer>
+			<hr>
+			<p>
+				© 2019 Sara Robinson with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script async="" src="./Sara Robinson_files/analytics.js.download"></script><script type="text/javascript" src="./Sara Robinson_files/jquery.min.js.download"></script>
+	<script type="text/javascript" src="./Sara Robinson_files/bootstrap.min.js.download"></script>
+	<script type="text/javascript" src="./Sara Robinson_files/app.js.download"></script>
+
+
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-135513031-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</body></html>
